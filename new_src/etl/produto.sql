@@ -1,4 +1,7 @@
 -- Databricks notebook source
+-- DROP TABLE IF EXISTS silver.analytics.fs_vendedor_produto;
+-- CREATE TABLE silver.analytics.fs_vendedor_produto
+
 WITH tb_join AS (
 	SELECT DISTINCT t2.idVendedor,
 	       t3.*
@@ -40,15 +43,3 @@ tb_summary AS (
 SELECT '2018-01-01' AS  dtReference, 
 * 
 FROM tb_summary;
-
--- COMMAND ----------
-
--- Query auxiliar para descobrir as top 15 categorias mais vendidas
-SELECT descCategoria
-FROM silver.olist.item_pedido AS t1
-LEFT JOIN silver.olist.produto AS t2
-ON t1.idProduto = t2.idProduto
-WHERE t1.idVendedor IS NOT NULL
-GROUP BY 1
-ORDER BY COUNT(DISTINCT idPedido) DESC
-LIMIT 15;
