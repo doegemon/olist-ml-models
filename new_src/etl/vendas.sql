@@ -1,4 +1,7 @@
 -- Databricks notebook source
+-- DROP TABLE IF EXISTS silver.analytics.fs_vendedor_vendas;
+-- CREATE TABLE silver.analytics.fs_vendedor_vendas
+
 WITH tb_pedido_item AS (
   SELECT t2.*,
 	t1.dtPedido
