@@ -1,4 +1,3 @@
--- Databricks notebook source
 -- DROP TABLE IF EXISTS silver.analytics.fs_vendedor_vendas;
 -- CREATE TABLE silver.analytics.fs_vendedor_vendas
 
@@ -8,8 +7,8 @@ WITH tb_pedido_item AS (
   FROM silver.olist.pedido AS t1
   LEFT JOIN silver.olist.item_pedido AS t2
   ON t1.idPedido = t2.idPedido
-  WHERE t1.dtPedido < '2018-01-01'
-  AND t1.dtPedido >= add_months('2018-01-01', -6)
+  WHERE t1.dtPedido < '{date}'
+  AND t1.dtPedido >= add_months('{date}', -6)
   AND t2.idVendedor IS NOT NULL
 ),
 tb_summary AS (
@@ -17,7 +16,7 @@ tb_summary AS (
   COUNT(DISTINCT idPedido) AS qtdPedidos,
   COUNT(DISTINCT DATE(dtPedido)) AS qtdDias,
   COUNT(DISTINCT idProduto) AS qtItens,
-  MIN(DATEDIFF('2018-01-01', dtPedido)) AS qtdRecencia,
+  MIN(DATEDIFF('{date}', dtPedido)) AS qtdRecencia,
   SUM(vlPreco) / COUNT(DISTINCT idPedido) AS avgTicket,
   AVG(vlPreco) AS avgValorProduto,
   MAX(vlPreco) AS maxValorProduto,
@@ -43,11 +42,11 @@ tb_min_max AS (
 tb_life AS (
   SELECT t2.idVendedor,
   SUM(vlPreco) AS LTV,
-  MAX(DATEDIFF('2018-01-01', dtPedido)) AS qtdeDiasBase
+  MAX(DATEDIFF('{date}', dtPedido)) AS qtdeDiasBase
   FROM silver.olist.pedido AS t1
   LEFT JOIN silver.olist.item_pedido AS t2
   ON t1.idPedido = t2.idPedido
-  WHERE t1.dtPedido < '2018-01-01'
+  WHERE t1.dtPedido < '{date}'
   AND t2.idVendedor IS NOT NULL
   GROUP BY 1
 ),
@@ -68,7 +67,8 @@ tb_intervalo AS (
   FROM tb_lag
   GROUP BY 1
 )
-SELECT '2018-01-01' as dtReference,
+SELECT '{date}' as dtReference,
+NOW() as dtIngestion,
 t1.*,
 t2.minVlPedido,
 t2.maxVlPedido,

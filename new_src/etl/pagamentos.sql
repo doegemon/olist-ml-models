@@ -1,4 +1,3 @@
--- Databricks notebook source
 -- DROP TABLE IF EXISTS silver.analytics.fs_vendedor_pagamentos;
 -- CREATE TABLE silver.analytics.fs_vendedor_pagamentos
 
@@ -8,8 +7,8 @@ WITH tb_pedidos AS (
 	FROM silver.olist.pedido AS t1
 	LEFT JOIN silver.olist.item_pedido AS t2
 	ON t1.idPedido = t2.idPedido
-	WHERE t1.dtPedido < '2018-01-01'
-	AND t1.dtPedido >= add_months('2018-01-01', -6)
+	WHERE t1.dtPedido < '{date}'
+	AND t1.dtPedido >= add_months('{date}', -6)
 	AND t2.idVendedor IS NOT NULL
 ),
 tb_join AS (
@@ -62,7 +61,8 @@ tb_cartao AS (
 	WHERE descTipoPagamento = 'credit_card'
 	GROUP BY idVendedor
 )
-SELECT '2018-01-01' AS dtReference,
+SELECT '{date}' AS dtReference,
+        NOW() as dtIngestion,
         t1.*,
         t2.avgQtdeParcelas,
         t2.medianQtdeParcelas,
