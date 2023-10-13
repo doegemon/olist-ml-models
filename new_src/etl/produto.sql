@@ -1,4 +1,3 @@
--- Databricks notebook source
 -- DROP TABLE IF EXISTS silver.analytics.fs_vendedor_produto;
 -- CREATE TABLE silver.analytics.fs_vendedor_produto
 
@@ -10,8 +9,8 @@ WITH tb_join AS (
 	ON t1.idPedido = t2.idPedido
 	LEFT JOIN silver.olist.produto AS t3
 	ON t2.idProduto = t3.idProduto
-	WHERE t1.dtPedido < '2018-01-01'
-	AND t1.dtPedido >= add_months('2018-01-01', -6)
+	WHERE t1.dtPedido < '{date}'
+	AND t1.dtPedido >= add_months('{date}', -6)
 	AND t2.idVendedor IS NOT NULL
 ),
 tb_summary AS (
@@ -40,6 +39,7 @@ tb_summary AS (
 	FROM tb_join
 	GROUP BY 1
 )
-SELECT '2018-01-01' AS  dtReference, 
+SELECT '{date}' AS  dtReference, 
+NOW() as dtIngestion,
 * 
 FROM tb_summary;
