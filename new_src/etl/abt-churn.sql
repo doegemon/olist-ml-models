@@ -167,4 +167,5 @@ FROM tb_features AS t1
 LEFT JOIN tb_flga As t2
 ON t1.idVendedor = t2.idVendedor
 AND t1.dtReference = t2.dtReference
+WHERE DAY(t1.dtReference) = 1
 ORDER BY t1.idVendedor, t2.dtReference
