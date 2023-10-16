@@ -1,10 +1,16 @@
 # Databricks notebook source
+# MAGIC %pip install feature-engine scikit-plot mlflow
+
+# COMMAND ----------
+
 # DBTITLE 1,Bibliotecas
+import mlflow
 import pandas as pd
 import scikitplot as skplt
 
 from sklearn import tree
 from sklearn import metrics
+from sklearn import ensemble
 from sklearn import pipeline
 from sklearn import model_selection
 from feature_engine import imputation
@@ -75,7 +81,6 @@ model_pipeline.fit(X_train, y_train)
 # DBTITLE 1,Verificando o Treino do Modelo
 predict = model_pipeline.predict(X_train)
 probas = model_pipeline.predict_proba(X_train)
-proba = probas[:,1]
 
 # COMMAND ----------
 
@@ -124,3 +129,37 @@ fs_importance = model_pipeline[-1].feature_importances_
 fs_cols = model_pipeline[:-1].transform(X_train.head(1)).columns.tolist()
 
 pd.Series(fs_importance, index=fs_cols).sort_values(ascending=False)
+
+# COMMAND ----------
+
+# DBTITLE 1,MLFlow
+# Vinculando o modelo ao experimento
+mlflow.set_experiment("/Users/email/olist-churn-doegemon")
+
+# COMMAND ----------
+
+with mlflow.start_run():
+    
+    mlflow.sklearn.autolog()
+
+    imputer_minus_100 = imputation.ArbitraryNumberImputer(arbitraty_number = -100, variables=missing_minus_100)
+    imputer_0 = imputation.ArbitraryNumberImputer(arbitraty_number = 0, variables=missing_0)
+
+    # model = tree.DecisionTreeClassifier(min_samples_leaf=50)
+    model = ensemble.RandomForestClassifier(min_samples_leaf=50, n_jobs=-1, n_estimators=300, random_state=42)
+
+    params = {"min_samples_leaf": [5, 10, 20, 50, 100], "n_estimators": [50, 100, 200, 300, 500]}
+
+    grid = model_selection.GridSearchCV(model, params, cv=3, verbose=3, scoring='roc_auc')
+
+    model_pipeline = pipeline.Pipeline([('Imputer -100', imputer_minus_100), ('Imputer 0', imputer_0), ('Grid Search', grid),])
+
+    model_pipeline.fit(X_train, y_train)
+
+    auc_train = metrics.roc_auc_score(y_train, model_pipeline.predict_proba(X_train)[:,1])
+    auc_test = metrics.roc_auc_score(y_test, model_pipeline.predict_proba(X_test)[:,1])
+    auc_oot = metrics.roc_auc_score(df_oot[target], model_pipeline.predict_proba(df_oot[features])[:,1])
+
+    metrics_model = {"auc_train": auc_train, "auc_test": auc_test, "auc_oot": auc_oot}
+
+    mlflow.log_metrics(metrics_model)
