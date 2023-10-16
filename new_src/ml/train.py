@@ -1,9 +1,12 @@
 # Databricks notebook source
 # DBTITLE 1,Bibliotecas
 import pandas as pd
-from sklearn import model_selection
+import scikitplot as skplt
+
 from sklearn import tree
+from sklearn import metrics
 from sklearn import pipeline
+from sklearn import model_selection
 from feature_engine import imputation
 
 # COMMAND ----------
@@ -23,8 +26,9 @@ df_train = df[df['dtReference'] != '2018-01-01']
 # DBTITLE 1,Definindo Variáveis
 var_identity = ['dtReference', 'idVendedor']
 var_target = 'flChurn'
+to_remove = ['qtdRecencia', target] + var_identity
 features = df_train.columns.tolist()
-features = list(set(features) - set(var_identity + [target]))
+features = list(set(features) - set(to_remove))
 
 # COMMAND ----------
 
@@ -58,7 +62,7 @@ imputer_0 = imputation.ArbitraryNumberImputer(arbitraty_number = 0, variables=mi
 # COMMAND ----------
 
 # DBTITLE 1,Modelos
-model = tree.DecisionTreeClassifier()
+model = tree.DecisionTreeClassifier(min_samples_leaf=50)
 
 model_pipeline = pipeline.Pipeline([('Imputer -100', imputer_minus_100), ('Imputer 0', imputer_0), ('Decision Tree', model),])
 
@@ -68,8 +72,55 @@ model_pipeline.fit(X_train, y_train)
 
 # COMMAND ----------
 
-model_pipeline.predict(X_test)
+# DBTITLE 1,Verificando o Treino do Modelo
+predict = model_pipeline.predict(X_train)
+probas = model_pipeline.predict_proba(X_train)
+proba = probas[:,1]
 
 # COMMAND ----------
 
-model_pipeline.predict(df_oot[features])
+skplt.metrics.plot_roc(y_train, probas)
+
+# COMMAND ----------
+
+skplt.metrics.plot_ks_statistic(y_train, probas)
+
+# COMMAND ----------
+
+skplt.metrics.plot_lift_curve(y_train, probas)
+
+# COMMAND ----------
+
+# DBTITLE 1,Performance - Teste
+predict_test = model_pipeline.predict(X_test)
+probas_test = model_pipeline.predict_proba(X_test)
+
+# COMMAND ----------
+
+skplt.metrics.plot_roc(y_test, probas_test)
+
+# COMMAND ----------
+
+skplt.metrics.plot_ks_statistic(y_test, probas_test)
+
+# COMMAND ----------
+
+# DBTITLE 1,Performance - OOT
+predict_oot = model_pipeline.predict(df_oot[features])
+probas_oot = model_pipeline.predict_proba(df_oot[features])
+
+# COMMAND ----------
+
+skplt.metrics.plot_roc(df_oot[target], probas_oot)
+
+# COMMAND ----------
+
+skplt.metrics.plot_ks_statistic(df_oot[target], probas_oot)
+
+# COMMAND ----------
+
+# DBTITLE 1,Feature Importance
+fs_importance = model_pipeline[-1].feature_importances_
+fs_cols = model_pipeline[:-1].transform(X_train.head(1)).columns.tolist()
+
+pd.Series(fs_importance, index=fs_cols).sort_values(ascending=False)
