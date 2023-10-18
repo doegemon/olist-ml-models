@@ -19,7 +19,7 @@ Levantadas algumas ideias, a escolhida foi a de desenvolver um modelo de Machine
 
 Todo o desenvolvimento do projeto foi realizado no Databricks, onde as pessoas `assinantes` do canal do [Téo Me Why](https://www.twitch.tv/teomewhy) têm acesso ao Datalake para realizar seus próprios experimentos.
 
-Passei por todas etapas do ciclo analítico, desde ETL das fontes de dados, criação de `feature store`, criação da `ABT` (_Analytical Base Table_), treinamento dos algoritmos, e implementação do algoritmo com melhores resultados para novas predições. Utilizaremos ainda o `MLFlow` para gestão de nossos modelos.
+Passei por todas etapas do ciclo analítico, desde ETL das fontes de dados, criação de `feature store`, criação da `ABT` (_Analytical Base Table_), treinamento dos algoritmos, e implementação do algoritmo com melhores resultados para novas predições.
 
 Com o problema bem definido, foi feito um _brainstorm_ para definir quais variáveis poderiam ajudar a prever o evento de interesse (_churn_), com a criação das _queries_ e respectivas tabelas com base no conjunto de dados disponível para a extração dessas variáveis.
 
@@ -32,4 +32,4 @@ Definido o melhor modelo, torna-se possível realizar novas predições e criar 
 ## Conclusões
 Feita a Classificação dos clientes com relação à probabilidade de entrarem em _churn_, a visualização da lista ordenada através de uma tabela no Datalake permite que o time responsável pela relação com o cliente se organize e seja muito mais assertivo em evitar que os clientes entrem em _churn_.
 
-Ainda, o desenvolvimento desse projeto me propiciou um melhor conhecimento do ambiente do Databricks e algumas de suas funcionalidades, como por exemplo, exploração do Data Catalog, criação de _schemas_ e tabelas, integração com o Git/Github e MlFlow, entre outras.
+Ainda, o desenvolvimento desse projeto me propiciou um melhor conhecimento do ambiente do Databricks e algumas de suas funcionalidades, como por exemplo, exploração do Data Catalog, criação de _schemas_ e tabelas, integração com o Git/Github e MLFlow, entre outras.
